@@ -1,0 +1,106 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#F7FAFC] text-[#102A43] font-sans antialiased overflow-x-hidden;
+  }
+}
+
+/* Glassmorphism & Panel Styling - Hybrid Blue + Orange */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(20, 121, 209, 0.12);
+  box-shadow: 0 4px 20px -2px rgba(7, 26, 43, 0.05);
+}
+
+.glass-card {
+  background: #ffffff;
+  border: 1px solid rgba(20, 121, 209, 0.12);
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 12px rgba(7, 26, 43, 0.04);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card:hover {
+  border-color: rgba(255, 122, 24, 0.4);
+  box-shadow: 0 10px 25px -4px rgba(7, 26, 43, 0.1);
+  transform: translateY(-2px);
+}
+
+.dark-glass-card {
+  background: #0B2942;
+  border: 1px solid rgba(40, 184, 242, 0.2);
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 20px rgba(7, 26, 43, 0.3);
+  color: #F7FAFC;
+  transition: all 0.25s ease-in-out;
+}
+
+.dark-glass-card:hover {
+  border-color: #28B8F2;
+  box-shadow: 0 8px 30px rgba(40, 184, 242, 0.25);
+}
+
+/* Hero & Dark Bar containers */
+.navy-hero {
+  background: radial-gradient(circle at 50% 20%, #0B2942 0%, #071A2B 100%);
+  color: #F7FAFC;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #EAF6FF;
+}
+::-webkit-scrollbar-thumb {
+  background: #1479D1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #FF7A18;
+}
+
+/* Leaflet Custom Overrides */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  background: #071A2B !important;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  z-index: 1;
+}
+
+.leaflet-popup-content-wrapper {
+  background: #0B2942 !important;
+  color: #F7FAFC !important;
+  border: 1px solid rgba(40, 184, 242, 0.3);
+  border-radius: 10px;
+  box-shadow: 0 20px 30px -5px rgba(7, 26, 43, 0.7);
+}
+
+.leaflet-popup-tip {
+  background: #0B2942 !important;
+}
+
+/* Heat Risk Level Badges */
+.badge-critical {
+  @apply bg-red-100 text-red-700 border border-red-300 font-bold px-2.5 py-0.5 rounded-full text-xs;
+}
+.badge-high {
+  @apply bg-orange-100 text-orange-700 border border-orange-300 font-bold px-2.5 py-0.5 rounded-full text-xs;
+}
+.badge-moderate {
+  @apply bg-amber-100 text-amber-700 border border-amber-300 font-bold px-2.5 py-0.5 rounded-full text-xs;
+}
+.badge-low {
+  @apply bg-cyan-100 text-cyan-800 border border-cyan-300 font-bold px-2.5 py-0.5 rounded-full text-xs;
+}
+.badge-very-low {
+  @apply bg-blue-100 text-blue-800 border border-blue-300 font-bold px-2.5 py-0.5 rounded-full text-xs;
+}
