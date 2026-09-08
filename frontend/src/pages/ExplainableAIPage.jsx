@@ -1,13 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { fetchLocations, fetchLocationById } from '../services/api';
+import { useArea } from '../context/AreaContext';
 import { Activity, Sparkles, BarChart2, Info, ChevronRight, CheckCircle2, ShieldAlert } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 export default function ExplainableAIPage() {
+  const { currentArea, setAreaById } = useArea();
   const [locations, setLocations] = useState([]);
-  const [selectedId, setSelectedId] = useState('loc_central');
+  const [selectedId, setSelectedId] = useState(currentArea?.id || 'loc_barra');
   const [details, setDetails] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (currentArea?.id && currentArea.id !== selectedId) {
+      setSelectedId(currentArea.id);
+    }
+  }, [currentArea?.id]);
 
   useEffect(() => {
     async function init() {
@@ -67,7 +75,10 @@ export default function ExplainableAIPage() {
 
         <select
           value={selectedId}
-          onChange={(e) => setSelectedId(e.target.value)}
+          onChange={(e) => {
+            setSelectedId(e.target.value);
+            setAreaById(e.target.value);
+          }}
           className="bg-[#F7FAFC] border border-slate-300 rounded-xl px-4 py-2.5 text-xs text-[#071A2B] focus:outline-none focus:ring-2 focus:ring-[#1479D1] font-bold w-full sm:w-80"
         >
           {locations.map(loc => (
@@ -109,9 +120,9 @@ export default function ExplainableAIPage() {
                       if (active && payload && payload.length) {
                         const d = payload[0].payload;
                         return (
-                          <div className="bg-[#0B2942] text-white p-2.5 rounded-lg border border-[#1479D1]/40 text-xs shadow-xl">
-                            <strong className="block text-[#FF9F43]">{d.factor}</strong>
-                            <span>Contribution: <strong>{d.percentage}%</strong></span>
+                          <div className="bg-white/95 text-slate-800 p-3 rounded-xl border border-slate-200 text-xs shadow-xl">
+                            <strong className="block text-[#FF7A18] font-bold">{d.factor}</strong>
+                            <span className="text-slate-600">Contribution: <strong className="text-slate-900">{d.percentage}%</strong></span>
                           </div>
                         );
                       }

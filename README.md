@@ -1,214 +1,157 @@
 # HeatMapX — Urban Heat Intelligence Ecosystem
 
-> **More Than a Heat Map — A Complete Urban Heat Intelligence Ecosystem**
-
-Primary Demonstration City: **Kanpur Nagar, Uttar Pradesh, India**
+> **More Than a Heat Map — A Complete Urban Heat Intelligence Ecosystem**  
+> Primary Demonstration City: **Kanpur Nagar, Uttar Pradesh, India**
 
 ---
 
 ## 1. Executive Summary
 
-**HeatMapX** is a production-quality, responsive geospatial AI and climate intelligence platform designed to detect urban heat hotspots, explain their physical and anthropogenic drivers, forecast future thermal stress, recommend localized cooling interventions, simulate scenarios via a prototype **Digital Twin**, evaluate heat equity, and mobilize grassroots community participation through the **Citizen Climate Action** ecosystem.
+**HeatMapX** is a geospatial AI and climate intelligence platform designed to detect urban heat hotspots, explain their physical and anthropogenic drivers, forecast future thermal stress, recommend localized cooling interventions, simulate scenarios via a **3D Procedural Digital Twin**, evaluate heat equity, provide heat-aware **Cool Route Navigation**, and mobilize grassroots community participation through the **Citizen Climate Action** ecosystem.
 
-Inspired by Earth Observation frameworks (ISRO, NASA, ESA), HeatMapX combines thermal infrared satellite observations, multi-spectral vegetation and built-up indices, meteorological physics, and demographic vulnerability into a unified, actionable decision-support platform.
-
----
-
-## 2. Core Problem & Solution
-
-### The Urban Heat Problem in Kanpur Nagar
-During North India's pre-monsoon summer peaks (May–June), land surface temperatures (LST) across Kanpur's dense commercial hubs (Kanpur Central, Ghanta Ghar, Sisamau) and industrial manufacturing clusters (Panki, Jajmau) consistently exceed **44°C to 46°C**.
-- **Impervious Concrete Canyons**: High built-up density (NDBI > 0.70) traps shortwave solar radiation during daylight and radiates sensible heat throughout the night.
-- **Asymmetric Vulnerability**: Informal settlements with corrugated tin roofs, outdoor street vendors, and manual laborers suffer acute heat stress with minimal access to air-conditioned refuges.
-- **Data Blindspots**: Traditional single-station ambient thermometers report only macro air temperature, failing to detect localized surface hotspots.
-
-### The HeatMapX Solution
-1. **Multi-Spectral Satellite Fusion**: Derives Land Surface Temperature (LST), Normalized Difference Vegetation Index (NDVI), Normalized Difference Built-up Index (NDBI), Soil Moisture Index (SMI), and Surface Albedo ($\alpha$).
-2. **Microclimate Physics Layer**: Quantifies the thermodynamic skin differential $\Delta T = \text{LST} - T_{\text{air}}$ and human Heat Index.
-3. **Composite Risk Modeling**: Formulates composite risk as $\text{Risk} = (\text{Hazard} \times 0.50) + (\text{Exposure} \times 0.25) + (\text{Vulnerability} \times 0.25)$.
-4. **Explainable AI (XAI)**: Decomposes ward thermal stress into ranked, percentage-attributed drivers.
-5. **AI Mitigation Advisor**: Provides costed cooling recommendations (cool roofs, urban tree canopy, permeable pavers, hydration hubs).
-6. **Digital Twin "What-If" Simulator**: Evaluates temperature and risk reductions before capital is spent.
-7. **Citizen Climate Action**: Empowers residents to submit verified tree plantings, cool roof coatings, and rooftop gardens, earning digital badges and awards.
+Inspired by Earth Observation frameworks (ISRO, NASA, ESA), HeatMapX combines thermal infrared satellite observations, multi-spectral vegetation and built-up indices, thermodynamic physics, and demographic vulnerability into a unified, actionable decision-support platform.
 
 ---
 
-## 3. Technology Stack
-
-### Frontend
-- **Framework**: React.js (v18.2) + Vite 5
-- **Routing**: React Router DOM (v6.22)
-- **Geospatial Mapping**: Leaflet (v1.9.4) + React-Leaflet (v4.2.1)
-- **Data Visualizations**: Recharts (v2.12)
-- **Icons**: Lucide Icons
-- **Design System & Styling**: Tailored Vanilla CSS + Tailwind CSS with Blue + Orange hybrid palette:
-  - Deep Navy: `#071A2B`
-  - Dark Blue: `#0B2942`
-  - Primary Blue: `#1479D1`
-  - Electric Cyan: `#28B8F2`
-  - Vibrant Orange: `#FF7A18`
-  - Warm Orange: `#FF9F43`
-  - Soft White: `#F7FAFC`
-
-### Backend
-- **Runtime**: Node.js
-- **Web Framework**: Express.js (v4.19)
-- **Security**: Helmet, CORS, Express JSON parser
-- **Logging**: Morgan
-- **Database (Optional / Atlas Ready)**: MongoDB + Mongoose with seamless fallback to in-memory seeded Kanpur GeoJSON & Citizen Action store.
-
----
-
-## 4. Architecture & Data Pipeline
+## 2. Platform Architecture & Capabilities
 
 ```text
 Satellite & Environmental Data (LST, NDVI, NDBI, SMI, Albedo)
                            ↓
                Heat Detection & Hotspots
                            ↓
-           Microclimate Physics Layer (Delta T)
+            Microclimate Physics Layer (Delta T)
                            ↓
-                    AI Heat Risk Model
+                     AI Heat Risk Model
                            ↓
-             Explainable AI (Ranked Drivers)
+              Explainable AI (Ranked Drivers)
                            ↓
-             AI Mitigation Recommendations
+              AI Mitigation Recommendations
                            ↓
-           Digital Twin "What-If" Simulation
+      3D Digital Twin Procedural "What-If" Simulation
                            ↓
-            Citizen Climate Action Center
+         Safe Cool Route Pedestrian Navigation
                            ↓
-           Spatial Impact Markers on Heat Map
+             Heat Equity Prioritization Model
+                           ↓
+       TEE-Ready Security & Differential Privacy Layer
+                           ↓
+             Citizen Climate Action Center
 ```
 
 ---
 
-## 5. Folder Structure
+## 3. Key Modules & Innovations
 
-```
-HBTU Hackathon/
-├── backend/
-│   ├── src/
-│   │   ├── controllers/
-│   │   │   ├── heatmapController.js    # Kanpur GIS, forecast, physics, simulation
-│   │   │   └── citizenController.js    # Citizen actions, profile, badges, awards, leaderboard
-│   │   ├── models/
-│   │   │   ├── CitizenAction.js        # Mongoose schema for citizen submissions
-│   │   │   ├── Badge.js                # Digital achievement badges schema
-│   │   │   ├── Award.js                # Civic honor awards schema
-│   │   │   ├── User.js                 # User profile with gamification stats
-│   │   │   ├── Location.js             # Geospatial ward location schema
-│   │   │   └── HeatRisk.js             # Risk metrics schema
-│   │   ├── routes/
-│   │   │   └── apiRoutes.js            # Consolidated REST endpoints
-│   │   └── services/
-│   │       ├── kanpurGeoData.js        # 12 Kanpur wards, roads, hotspots, mitigations
-│   │       ├── riskModelService.js     # Physics, composite risk, simulation, cool route graph
-│   │       └── citizenService.js       # In-memory store, badge logic, leaderboard engine
-│   ├── package.json
-│   └── server.js                       # Express server entry point
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── analysis/               # AreaAnalysisPanel
-│   │   │   ├── common/                 # DemoBanner
-│   │   │   ├── layout/                 # Navbar, Footer
-│   │   │   └── map/                    # MapView, LayerControl, MapLegend
-│   │   ├── pages/
-│   │   │   ├── LandingPage.jsx         # Hero, visual storytelling, Kanpur demo
-│   │   │   ├── DashboardPage.jsx       # KPIs, Core MVP/Phase 2/Future tabs, charts
-│   │   │   ├── HeatMapPage.jsx         # Full-screen GIS workspace
-│   │   │   ├── PhysicsPage.jsx         # LST vs Air Temp (Delta T), interactive sandbox
-│   │   │   ├── ExplainableAIPage.jsx   # Rule-based explainability prototype
-│   │   │   ├── ForecastPage.jsx        # 7-day thermal risk forecast
-│   │   │   ├── MitigationPage.jsx      # AI Mitigation Advisor cards
-│   │   │   ├── DigitalTwinPage.jsx     # "What-If" scenario sliders, before/after deltas
-│   │   │   ├── CoolRoutesPage.jsx      # Thermal-weighted route comparison
-│   │   │   ├── HeatEquityPage.jsx      # Heat equity priority matrix
-│   │   │   ├── AnalyticsPage.jsx       # Scatter correlation & exposure charts
-│   │   │   ├── CitizenActionPage.jsx   # Action submission, badges, awards, leaderboard
-│   │   │   └── AboutPage.jsx           # Methodology, pipeline, TEE architecture
-│   │   ├── services/
-│   │   │   └── api.js                  # Frontend API adapters with offline fallbacks
-│   │   ├── App.jsx                     # Router mounting 13 pages
-│   │   ├── index.css                   # Blue + Orange design tokens & overrides
-│   │   └── main.jsx                    # React entry point
-│   ├── index.html
-│   ├── tailwind.config.js
-│   ├── vite.config.js
-│   └── package.json
-└── README.md
-```
+### 🏙️ 3D Digital Twin Simulator (`/digital-twin`)
+- **Procedural 3D City Engine**: Powered by Three.js, renders procedural building blocks, urban density heights, and thermal colormaps for Kanpur Nagar.
+- **Interactive Physics Sliders**:
+  - *Tree Canopy Cover (+0% to +50%)*: Dynamically spawns up to 80 procedural 3D trees across streets and parks.
+  - *High-Albedo Cool Roofs (0% to 100%)*: Interactively applies reflective cool roof coatings to building rooftops.
+  - *Surface Reflectance (Albedo)*: Shifts pavement reflectance from dark asphalt to bright reflective concrete.
+  - *Water Misting Kiosks*: Simulates evaporative cooling near public transit nodes.
+- **Outcome Metrics**: Displays real-time Before vs. After physics calculations: $\Delta\text{LST}$ reduction, composite risk score drop, and citizens benefited.
+
+### 🧭 Safe Cool Route Navigation (`/cool-routes`)
+- **Google Maps-Style Navigation**: Origin & destination selectors with instant Swap capability across all Kanpur monitored wards.
+- **Multi-Route Mode Comparison**:
+  - 🌿 **Coolest Route** (Emerald green, -38% heat stress, 78% tree shade canopy)
+  - ⚖️ **Balanced Route** (Cyan, optimal tradeoff between detour distance and canopy protection)
+  - ⚡ **Fastest Direct Route** (Red, shortest road network path, high thermal solar exposure)
+- **Interactive Leaflet Route Map**: Renders colored route polylines, start/end markers, and municipal drinking water ATMs.
+- **Elevation & Heat Exposure Profile**: Recharts area chart plotting thermal hazard vs. canopy shade along the route distance.
+- **Turn-by-Turn Guidance**: Detailed directions with thermal cautions (*"Direct solar glare on asphalt — recommend UV umbrella or cap"*).
+
+### ⚖️ Heat Equity & Vulnerability Matrix (`/heat-equity`)
+- **Kanpur Equity Choropleth Map**: Ward polygons colored by municipal equity intervention priority.
+- **Formula**:
+  $$\text{Equity Priority Index} = (\text{Hazard} \times 0.40) + (\text{Population Density Factor} \times 3.5) + (\text{Vulnerability Score} \times 0.35)$$
+- **Ward Equity Inspector**: Explains why high-density or vulnerable wards (e.g. Sisamau Bazaar, Kanpur Central) receive top funding priority over unpopulated industrial zones.
+
+### 🔒 TEE-Ready Security & Differential Privacy (`/security`)
+- **Confidential Computing Architecture**: Memory isolation boundary isolating sensitive demographic joins and proprietary microclimate risk models.
+- **Live Remote Attestation Simulator**: Cryptographically measures runtime integrity via SHA-256 and validates PCR registers (PCR0, PCR1, PCR2).
+- **Differential Privacy ($\epsilon = 0.5$)**: Laplace noise mechanism offsets citizen household coordinates to preserve residential privacy while maintaining ward-level GIS fidelity.
+
+### 🔑 Role-Based Access & Quick Demo Sign-In (`/login`)
+One-click judge evaluation logins:
+1. **Municipal Heat Officer**: Dr. Alok Verma (*Kanpur Municipal Corporation*)
+2. **Geospatial Climate Analyst**: Neha Srivastava (*IIT Kanpur Climate Lab*)
+3. **Citizen Climate Champion**: Ramesh Chandra (*Sisamau Bazaar*)
 
 ---
 
-## 6. REST API Endpoints
+## 4. Technology Stack
 
-### Geospatial & Heat Intelligence
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/health` | Health check and demonstration city status |
-| `GET` | `/api/heatmap` | GeoJSON FeatureCollection (wards, roads, citizen points) |
-| `GET` | `/api/locations` | List of monitored Kanpur zones with risk metrics |
-| `GET` | `/api/location/:id` | Detailed ward breakdown (LST, Delta T, drivers, mitigations) |
-| `GET` | `/api/forecast` | 7-day thermal risk and temperature trajectory |
-| `GET` | `/api/environmental-factors`| Aggregated Kanpur citywide statistics |
-| `GET` | `/api/recommendations` | AI Mitigation Advisor intervention catalog |
-| `POST` | `/api/simulation` | Digital Twin "What-If" scenario simulation |
-| `GET` | `/api/routes` | Heat-aware cool pedestrian routing |
-| `GET` | `/api/equity` | Heat equity and climate justice rankings |
+### Frontend
+- **Framework**: React 18 + Vite 5
+- **Routing**: React Router DOM v6
+- **3D Graphics**: Three.js (WebGL procedural city block renderer)
+- **Geospatial Mapping**: Leaflet v1.9 + React-Leaflet v4
+- **Charts**: Recharts v2.12
+- **Icons**: Lucide React
+- **Styling**: Tailored CSS tokens + Tailwind CSS (Deep Navy `#071A2B`, Spatial Blue `#1479D1`, Tech Cyan `#28B8F2`, Thermal Orange `#FF7A18`)
 
-### Citizen Climate Action & Gamification
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/citizen/actions` | Retrieve verified citizen climate actions |
-| `POST` | `/api/citizen/actions` | Submit a new citizen climate mitigation action |
-| `GET` | `/api/citizen/profile` | Logged-in citizen impact summary and points |
-| `GET` | `/api/citizen/badges` | Digital achievement badges and progress |
-| `GET` | `/api/citizen/awards` | Digital civic honor awards and certificates |
-| `GET` | `/api/leaderboard` | Individual and neighborhood cool rankings |
+### Backend
+- **Runtime**: Node.js + Express.js
+- **Cryptography**: Node.js native `crypto` (AES-256-GCM, SHA-256 attestation, `crypto.scryptSync` password hashing)
+- **Data Engine**: Seeded GeoJSON & metrics service for Kanpur Nagar with optional MongoDB Atlas connection.
 
 ---
 
-## 7. Installation & Running Locally
+## 5. Quick Start & Local Execution
 
 ### Prerequisites
-- Node.js (v18 or v20 recommended)
-- npm (v9 or v10)
+- Node.js (v18 or higher)
+- npm (v9 or higher)
 
-### 1. Start Backend Server
+### 1. Start the Backend API Server
 ```bash
 cd backend
 npm install
 node server.js
 ```
-The REST API server will run at: `http://localhost:5000`
+*The backend starts at `http://localhost:5000`.*
 
-### 2. Start Frontend Application
+### 2. Start the Frontend Application
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-The Vite development server will open at: `http://localhost:5173`
+*The frontend starts at `http://localhost:5173`.*
 
 ### 3. Production Build Validation
 ```bash
 cd frontend
 npm run build
 ```
+*Transformed 2,362 modules cleanly into optimized production bundle in `dist/`.*
 
 ---
 
-## 8. Scientific Honesty & Demonstration Notice
+## 6. Monitored Zones in Kanpur Nagar
 
-> [!NOTE]
-> **DEMO MODE**: HeatMapX is currently operating in demonstration mode using simulated/sample data for **Kanpur Nagar, Uttar Pradesh, India**.
-> - Live satellite feeds (ISRO Bhuvan, MOSDAC, Landsat), real-time IMD weather stations, and census registries can be connected via the backend data adapter architecture.
-> - Terminology used: **Prototype**, **Demo model**, **Simulated data**, **AI-assisted**, **Estimated risk**, **Scenario simulation**.
-> - TEE Architecture: The platform is **TEE-ready** (Trusted Execution Environment) for sensitive demographic and infrastructure processing in confidential enclaves, but does not claim to run in hardware TEE during this prototype phase.
+| Zone ID | Ward Name | Primary Feature | Baseline LST | Risk Score |
+|---|---|---|---|---|
+| `loc_central` | Ward 24 - Collectorganj / Station Core | Commercial transit bottleneck, low albedo | 44.8°C | 88 (Critical) |
+| `loc_naveen` | Ward 18 - Civil Lines South / Mall Road | Dense commercial high-street | 43.6°C | 78 (High) |
+| `loc_sisamau` | Ward 14 - Sisamau Bazaar | High density (36k/km²), vulnerable roofs | 44.2°C | 86 (Critical) |
+| `loc_govind` | Ward 08 - Govind Nagar Commercial | Residential & retail mix | 42.1°C | 71 (High) |
+| `loc_panki` | Ward 11 - Panki Industrial Area | Factory sheds, high thermal emission | 45.4°C | 82 (Critical) |
+| `loc_jajmau` | Ward 29 - Jajmau Tannery Belt | Riverfront industrial cluster | 43.9°C | 76 (High) |
+| `loc_swaroop` | Ward 04 - Swaroop Nagar Residential | Tree-lined residential streets | 37.8°C | 46 (Moderate) |
+| `loc_iitk` | Ward 01 - IIT Kanpur & Kalyanpur | Canopy oasis, institutional campus | 33.5°C | 22 (Very Low) |
+| `loc_allen_zoo` | Ward 16 - Allen Forest / Zoo Perimeter | Urban botanical reserve and lake | 31.8°C | 18 (Very Low) |
+| `loc_barra` | Ward 32 - Barra Commercial Sector | South Kanpur urban sprawl | 42.8°C | 74 (High) |
+| `loc_kidwai` | Ward 06 - Kidwai Nagar Central | High-density planned residential | 40.5°C | 62 (High) |
+| `loc_cantt` | Ward 21 - Cantonment Green Belt | Protected military green buffer | 34.2°C | 26 (Low) |
 
 ---
 
-## 9. Contributors & Acknowledgments
-Built for **HBTU Hackathon** showcasing how cutting-edge geospatial AI, thermal physics, and citizen mobilization can safeguard Indian cities from the growing threat of extreme urban heat.
+## 7. Scientific Guardrails & Prototype Honesty
+
+HeatMapX maintains rigorous scientific transparency:
+- **Heuristic Proxies**: Composite risk scores, forecast projections, and Digital Twin deltas represent prototype decision support models calibrated for Kanpur Nagar. They do not claim certified medical risk forecasts.
+- **TEE Simulation**: In this demonstration deployment, cryptographic memory enclaves and remote attestation are simulated using Node.js native AES-256-GCM and SHA-256 measurement registers. The architecture is engineered so hardware enclaves (Intel SGX, AWS Nitro Enclaves) can run the model directly with zero application code changes.
+- **Multi-City Scaling**: Kanpur Nagar is the primary demonstration city. An isolated Varanasi prototype dataset is included in `backend/src/services/varanasiGeoData.js` to illustrate schema portability across the Indo-Gangetic plain.

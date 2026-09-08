@@ -8,28 +8,27 @@ export default function MapLegend({ activeLayer }) {
         return {
           title: 'Composite Heat Risk',
           unit: 'Risk Score (0 - 100)',
-          explanation: 'Synthesizes thermal hazard (LST, Heat Index), environmental indices (NDBI, NDVI), population exposure, and structural vulnerability.',
+          explanation: 'Synthesizes real thermal conditions (Air Temperature, Feels Like, Surface Heating) with neighborhood built density.',
           stops: [
-            { label: 'Critical (≥ 80)', color: '#ef4444' },
-            { label: 'Very High (70-79)', color: '#FF7A18' },
-            { label: 'High (55-69)', color: '#FF9F43' },
-            { label: 'Moderate (40-54)', color: '#f59e0b' },
-            { label: 'Low (25-39)', color: '#28B8F2' },
-            { label: 'Very Low (< 25)', color: '#06b6d4' }
+            { label: 'Critical (≥ 85)', color: '#ef4444' },
+            { label: 'Very High (70-84)', color: '#f97316' },
+            { label: 'High (50-69)', color: '#fb923c' },
+            { label: 'Moderate (30-49)', color: '#eab308' },
+            { label: 'Low (15-29)', color: '#10b981' },
+            { label: 'Safe / Cool (< 15)', color: '#3b82f6' }
           ]
         };
       case 'lst':
         return {
-          title: 'Land Surface Temperature (LST)',
+          title: 'Surface Temperature (LST)',
           unit: 'Degrees Celsius (°C)',
           explanation: 'Direct radiative skin temperature of urban rooftops, pavements, and soils captured by thermal satellite sensors.',
           stops: [
-            { label: '≥ 44°C (Extreme)', color: '#ef4444' },
-            { label: '41°C - 44°C', color: '#FF7A18' },
-            { label: '38°C - 41°C', color: '#FF9F43' },
-            { label: '35°C - 38°C', color: '#f59e0b' },
-            { label: '32°C - 35°C', color: '#28B8F2' },
-            { label: '< 32°C (Cool)', color: '#06b6d4' }
+            { label: '≥ 43°C (Extreme)', color: '#ef4444' },
+            { label: '40°C - 42.9°C', color: '#f97316' },
+            { label: '37°C - 39.9°C', color: '#eab308' },
+            { label: '34°C - 36.9°C', color: '#10b981' },
+            { label: '< 34°C (Cool)', color: '#3b82f6' }
           ]
         };
       case 'ndvi':
@@ -164,13 +163,13 @@ export default function MapLegend({ activeLayer }) {
   const details = getLegendDetails();
 
   return (
-    <div className="bg-[#0B2942]/95 backdrop-blur-md p-3.5 rounded-xl border border-[#1479D1]/30 shadow-xl max-w-xs text-xs text-white">
-      <div className="space-y-1 mb-2.5 pb-2 border-b border-slate-700/60">
-        <h4 className="font-bold text-slate-100 flex items-center justify-between">
+    <div className="bg-white/92 backdrop-blur-xl p-4 rounded-2xl border border-slate-200/90 shadow-xl max-w-xs text-xs text-slate-800">
+      <div className="space-y-1 mb-2.5 pb-2 border-b border-slate-200/80">
+        <h4 className="font-extrabold text-slate-900 flex items-center justify-between">
           <span>{details.title}</span>
-          <span className="text-[10px] text-[#28B8F2] font-mono">{details.unit}</span>
+          <span className="text-[10px] text-[#ea580c] font-mono bg-orange-50 px-1.5 py-0.5 rounded border border-orange-200 font-bold">{details.unit}</span>
         </h4>
-        <p className="text-[11px] text-slate-300 leading-snug">
+        <p className="text-[11px] text-slate-500 leading-snug font-medium">
           {details.explanation}
         </p>
       </div>
@@ -180,10 +179,10 @@ export default function MapLegend({ activeLayer }) {
           <div key={idx} className="flex items-center justify-between text-[11px]">
             <div className="flex items-center gap-2">
               <span 
-                className="w-3.5 h-3.5 rounded shadow-sm inline-block border border-black/20" 
+                className="w-3.5 h-3.5 rounded shadow-sm inline-block border border-slate-300" 
                 style={{ backgroundColor: stop.color }}
               />
-              <span className="text-slate-200">{stop.label}</span>
+              <span className="text-slate-700 font-medium">{stop.label}</span>
             </div>
           </div>
         ))}

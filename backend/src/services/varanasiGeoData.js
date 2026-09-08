@@ -1,5 +1,12 @@
-// Structured GeoJSON and data service for Varanasi urban zones
-// GeoJSON coordinates strictly use [longitude, latitude] array pairs.
+/**
+ * HeatMapX Multi-City Expansion Dataset: Varanasi Urban Heat Prototype
+ * =====================================================================
+ * ARCHITECTURAL NOTICE:
+ * Kanpur Nagar (UP, India) is the primary demonstration city for the core HeatMapX MVP.
+ * This Varanasi dataset is maintained as an isolated prototype dataset illustrating
+ * HeatMapX's multi-city scalability and schema portability across the Indo-Gangetic plain.
+ * Coordinate format strictly uses [longitude, latitude] GeoJSON standards.
+ */
 
 const varanasiZones = [
   {

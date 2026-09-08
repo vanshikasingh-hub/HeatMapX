@@ -1,6 +1,7 @@
 const { kanpurZones, kanpurRoads, kanpurHotspots, defaultMitigationCatalog } = require('../services/kanpurGeoData');
 const { calculateRiskScore, getHeatDrivers, runDigitalTwinSimulation, calculateCoolRoute } = require('../services/riskModelService');
 const { getCitizenActions } = require('../services/citizenService');
+const { getLiveWeather } = require('../services/weatherService');
 
 // GET /api/health - Health check endpoint
 exports.getHealth = (req, res) => {
@@ -122,6 +123,7 @@ exports.getLocations = (req, res) => {
   try {
     const locations = kanpurZones.map(zone => {
       const risk = calculateRiskScore(zone.metrics);
+      const deltaT = Number((zone.metrics.lst - zone.metrics.airTemperature).toFixed(1));
       return {
         id: zone.id,
         name: zone.name,
@@ -130,10 +132,21 @@ exports.getLocations = (req, res) => {
         longitude: zone.longitude,
         riskScore: risk.score,
         riskLevel: risk.level,
+        riskReason: risk.reason,
+        riskAdvice: risk.advice,
         lst: zone.metrics.lst,
         airTemperature: zone.metrics.airTemperature,
+        deltaT,
+        humidity: zone.metrics.humidity,
+        heatIndex: zone.metrics.heatIndex,
+        ndvi: zone.metrics.ndvi,
+        ndbi: zone.metrics.ndbi,
+        smi: zone.metrics.smi,
+        albedo: zone.metrics.albedo,
+        elevation: zone.metrics.elevation,
         populationDensity: zone.metrics.populationDensity,
-        vulnerabilityScore: zone.metrics.vulnerabilityScore
+        vulnerabilityScore: zone.metrics.vulnerabilityScore,
+        anthropogenicHeatProxy: zone.metrics.anthropogenicHeatProxy
       };
     });
     res.json({ success: true, count: locations.length, data: locations });
@@ -195,60 +208,115 @@ exports.getLocationById = (req, res) => {
   }
 };
 
-// GET /api/forecast - Returns 7-day forecast data
-exports.getForecast = (req, res) => {
+// GET /api/weather - Returns live atmospheric weather from weather API for coordinates
+exports.getWeather = async (req, res) => {
   try {
-    const { locationId } = req.query;
-    const baseZone = kanpurZones.find(z => z.id === locationId) || kanpurZones[0];
-    const baseRisk = calculateRiskScore(baseZone.metrics).score;
+    const { lat, lon, locationId } = req.query;
+    let latitude = parseFloat(lat);
+    let longitude = parseFloat(lon);
 
-    const days = [
-      { dayLabel: "Today (Sat)", offset: 0, tempDelta: 0, humidityDelta: 0 },
-      { dayLabel: "Tomorrow (Sun)", offset: 1, tempDelta: 1.2, humidityDelta: -3 },
-      { dayLabel: "Day 3 (Mon)", offset: 2, tempDelta: 2.1, humidityDelta: -5 },
-      { dayLabel: "Day 4 (Tue)", offset: 3, tempDelta: 1.8, humidityDelta: -2 },
-      { dayLabel: "Day 5 (Wed)", offset: 4, tempDelta: 0.5, humidityDelta: 4 },
-      { dayLabel: "Day 6 (Thu)", offset: 5, tempDelta: -1.0, humidityDelta: 8 },
-      { dayLabel: "Day 7 (Fri)", offset: 6, tempDelta: -1.8, humidityDelta: 6 }
-    ];
+    if (isNaN(latitude) || isNaN(longitude)) {
+      if (locationId) {
+        const zone = kanpurZones.find(z => z.id === locationId || z.id === `loc_${locationId}`);
+        if (zone) {
+          latitude = zone.latitude;
+          longitude = zone.longitude;
+        }
+      }
+    }
 
-    const forecast = days.map(d => {
-      const today = new Date();
-      today.setDate(today.getDate() + d.offset);
-      const dateStr = today.toISOString().split('T')[0];
+    if (isNaN(latitude) || isNaN(longitude)) {
+      latitude = 26.4499;
+      longitude = 80.3319;
+    }
 
-      const temp = Number((baseZone.metrics.airTemperature + d.tempDelta).toFixed(1));
-      const humidity = Math.min(90, Math.max(30, baseZone.metrics.humidity + d.humidityDelta));
-      const heatIndex = Number((temp * (1 + humidity / 250)).toFixed(1));
-      const riskScore = Math.min(100, Math.max(10, Math.round(baseRisk + (d.tempDelta * 3.5))));
-
-      let riskLevel = "Moderate";
-      if (riskScore >= 80) riskLevel = "Critical";
-      else if (riskScore >= 65) riskLevel = "High";
-      else if (riskScore < 45) riskLevel = "Low";
-
-      return {
-        date: dateStr,
-        dayLabel: d.dayLabel,
-        locationId: baseZone.id,
-        locationName: baseZone.name,
-        riskScore,
-        riskLevel,
-        temperature: temp,
-        humidity,
-        heatIndex,
-        hotspotIntensity: riskScore >= 75 ? "High" : riskScore >= 50 ? "Moderate" : "Low"
-      };
-    });
-
+    const weather = await getLiveWeather(latitude, longitude);
     res.json({
       success: true,
-      datasetLabel: "Prototype / Simulated Forecast Model",
-      location: { id: baseZone.id, name: baseZone.name },
-      forecast
+      data: weather
     });
   } catch (err) {
-    res.status(500).json({ error: "Failed to generate forecast", details: err.message });
+    res.status(500).json({
+      success: false,
+      error: "Live weather data temporarily unavailable",
+      details: err.message
+    });
+  }
+};
+
+// GET /api/forecast - Returns 7-day predictive outlook driven by live weather
+exports.getForecast = async (req, res) => {
+  try {
+    const { locationId, lat, lon } = req.query;
+    const baseZone = kanpurZones.find(z => z.id === locationId || z.id === `loc_${locationId}`) || kanpurZones[0];
+
+    const targetLat = !isNaN(parseFloat(lat)) ? parseFloat(lat) : baseZone.latitude;
+    const targetLon = !isNaN(parseFloat(lon)) ? parseFloat(lon) : baseZone.longitude;
+
+    const weather = await getLiveWeather(targetLat, targetLon);
+
+    if (weather.isLive && weather.forecastDays && weather.forecastDays.length > 0) {
+      const forecast = weather.forecastDays.map(d => {
+        const temp = d.tempMax;
+        const humidity = weather.humidity || 55;
+        const heatIndex = d.feelsLikeMax;
+
+        // Calculate dynamic physical risk for each forecast day using actual forecasted inputs
+        // Daily max temperatures occur during daylight, so isDay is set to true for daily forecasts
+        const dayMetrics = {
+          ...baseZone.metrics,
+          airTemperature: temp,
+          heatIndex: heatIndex,
+          humidity: humidity,
+          isDay: true
+        };
+        const risk = calculateRiskScore(dayMetrics);
+
+        return {
+          date: d.date,
+          dayLabel: d.dayLabel,
+          locationId: baseZone.id,
+          locationName: baseZone.name,
+          riskScore: risk.score,
+          riskLevel: risk.level,
+          riskReason: risk.reason,
+          riskAdvice: risk.advice,
+          temperature: temp,
+          tempMin: d.tempMin,
+          humidity,
+          heatIndex,
+          uvMax: d.uvMax,
+          precipProbability: d.precipProbability,
+          condition: d.condition,
+          weatherCode: d.weatherCode,
+          hotspotIntensity: risk.score >= 75 ? "High" : risk.score >= 50 ? "Moderate" : "Low"
+        };
+      });
+
+      return res.json({
+        success: true,
+        isLive: true,
+        source: "Weather API (Open-Meteo)",
+        location: { 
+          id: baseZone.id, 
+          name: baseZone.name, 
+          wardName: baseZone.wardName, 
+          coordinates: [targetLat, targetLon] 
+        },
+        forecast
+      });
+    }
+
+    // Graceful error state if live weather API is unavailable - NEVER silently fake values
+    res.json({
+      success: false,
+      isLive: false,
+      error: "Live weather data temporarily unavailable",
+      location: { id: baseZone.id, name: baseZone.name, wardName: baseZone.wardName },
+      forecast: []
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to load forecast data", details: err.message });
   }
 };
 
