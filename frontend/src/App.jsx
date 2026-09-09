@@ -4,7 +4,7 @@ import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import DemoBanner from './components/common/DemoBanner';
 import ErrorBoundary from './components/common/ErrorBoundary';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { AreaProvider } from './context/AreaContext';
 import LocationPromptModal from './components/common/LocationPromptModal';
 import AreaSelectorModal from './components/common/AreaSelectorModal';
