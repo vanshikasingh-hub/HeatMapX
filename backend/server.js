@@ -10,7 +10,41 @@ const PORT = process.env.PORT || 5000;
 
 // Security & Utility Middleware
 app.use(helmet({ contentSecurityPolicy: false }));
-app.use(cors({ origin: '*' }));
+
+// CORS configuration supporting production Vercel domains, preview deployments, and local development
+const allowedOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
+  : null;
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow non-browser requests or same-origin requests (origin undefined)
+    if (!origin) return callback(null, true);
+
+    // If explicit origins configured, validate against them or Vercel preview URLs
+    if (allowedOrigins) {
+      if (allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      // Automatically trust Vercel preview deployment URLs (*.vercel.app)
+      if (/^https:\/\/[a-zA-Z0-9-]+\.vercel\.app$/.test(origin)) {
+        return callback(null, true);
+      }
+      // Allow localhost during development or testing
+      if (process.env.NODE_ENV !== 'production' && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+        return callback(null, true);
+      }
+      return callback(null, false);
+    }
+
+    // Default fallback (development / prototype mode): allow all origins
+    return callback(null, true);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json());
 app.use(morgan('dev'));
 
@@ -61,16 +95,21 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: "Internal Server Error", message: err.message });
 });
 
-// Start Express Server
-const server = app.listen(PORT, () => {
-  console.log(`🚀 HeatMapX REST API Server running on http://localhost:${PORT}`);
-  console.log(`📍 Primary Demonstration City: Kanpur Nagar, Uttar Pradesh, India`);
-});
+// Start Express Server only when executed directly (CLI / local development)
+if (require.main === module) {
+  const server = app.listen(PORT, () => {
+    console.log(`🚀 HeatMapX REST API Server running on http://localhost:${PORT}`);
+    console.log(`📍 Primary Demonstration City: Kanpur Nagar, Uttar Pradesh, India`);
+  });
 
-server.on('error', (err) => {
-  if (err.code === 'EADDRINUSE') {
-    console.error(`❌ Port ${PORT} is already in use by another process.`);
-  } else {
-    console.error('❌ Server startup error:', err);
-  }
-});
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`❌ Port ${PORT} is already in use by another process.`);
+    } else {
+      console.error('❌ Server startup error:', err);
+    }
+  });
+}
+
+// Export the Express application for Vercel deployment runtime
+module.exports = app;

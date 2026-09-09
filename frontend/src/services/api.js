@@ -1,5 +1,15 @@
 // API service adapter for HeatMapX frontend
-const BASE_URL = '/api';
+// Dynamically resolves API base URL: defaults to '/api' (unified Vercel / Vite proxy)
+// Supports VITE_API_URL / VITE_API_BASE_URL for decoupled backend deployments
+const rawBaseUrl = (
+  (typeof import.meta !== 'undefined' && import.meta.env && (import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL)) || '/api'
+).trim();
+const cleanBaseUrl = rawBaseUrl.replace(/\/+$/, '');
+export const API_BASE_URL = cleanBaseUrl === '' || cleanBaseUrl === '/api'
+  ? '/api'
+  : (cleanBaseUrl.endsWith('/api') ? cleanBaseUrl : `${cleanBaseUrl}/api`);
+
+const BASE_URL = API_BASE_URL;
 
 export async function fetchHeatmapGeoJSON() {
   try {

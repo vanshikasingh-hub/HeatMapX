@@ -5,6 +5,7 @@ const citizenController = require('../controllers/citizenController');
 const authController = require('../controllers/authController');
 
 // Heat Intelligence & Geospatial REST API endpoints
+router.get('/', heatmapController.getHealth);
 router.get('/health', heatmapController.getHealth);
 router.get('/heatmap', heatmapController.getHeatmapGeoJSON);
 router.get('/locations', heatmapController.getLocations);
