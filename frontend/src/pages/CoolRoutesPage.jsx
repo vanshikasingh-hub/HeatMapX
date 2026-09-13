@@ -323,8 +323,11 @@ export default function CoolRoutesPage() {
                       <TreePine className="w-4 h-4 text-emerald-600" />
                       <span>🌿 Coolest Route</span>
                     </span>
-                    <span className="text-[10px] bg-emerald-100/90 text-emerald-800 border border-emerald-300 font-bold px-2 py-0.5 rounded-full shrink-0">
-                      -{routeData.coolRoute.thermalStressReductionPct || 61}% Heat Stress
+                    <span 
+                      title="Modeled relative reduction in cumulative pedestrian thermal exposure index compared to the unshaded direct arterial corridor: (82 - 32) / 82 = 61%."
+                      className="text-[10px] bg-emerald-100/90 text-emerald-800 border border-emerald-300 font-bold px-2 py-0.5 rounded-full shrink-0 cursor-help"
+                    >
+                      -{routeData.coolRoute.thermalStressReductionPct || 61}% Exposure vs Unshaded
                     </span>
                   </div>
 

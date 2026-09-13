@@ -265,35 +265,38 @@ export default function DigitalTwinPage() {
               <div className="flex items-center justify-between text-xs">
                 <span className="font-bold text-emerald-900 flex items-center gap-1.5">
                   <Sparkles className="w-4 h-4 text-emerald-600" />
-                  <span>Simulated Cooling Impact: {selectedZone.name}</span>
+                  <span>Scenario Projection Model: {selectedZone.name}</span>
                 </span>
                 {hasSimulated && (
                   <span className="text-[10px] bg-emerald-200/60 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-full font-bold">
-                    Active Scenario
+                    Active Simulation
                   </span>
                 )}
               </div>
 
               <div className="grid grid-cols-3 gap-3 text-center">
                 <div className="p-2.5 rounded-xl bg-white/90 border border-emerald-200/80 shadow-sm space-y-0.5">
-                  <span className="text-[10px] text-slate-500 font-bold block truncate">Surface Drop</span>
+                  <span className="text-[10px] text-slate-500 font-bold block truncate">Projected Surface Drop</span>
                   <span className="text-lg sm:text-xl font-black text-emerald-600 font-mono">
                     -{lstReduction}°C
                   </span>
                 </div>
                 <div className="p-2.5 rounded-xl bg-white/90 border border-emerald-200/80 shadow-sm space-y-0.5">
-                  <span className="text-[10px] text-slate-500 font-bold block truncate">Risk Drop</span>
+                  <span className="text-[10px] text-slate-500 font-bold block truncate">Projected Risk Drop</span>
                   <span className="text-lg sm:text-xl font-black text-cyan-600 font-mono">
                     -{riskDelta} pts
                   </span>
                 </div>
                 <div className="p-2.5 rounded-xl bg-white/90 border border-emerald-200/80 shadow-sm space-y-0.5">
-                  <span className="text-[10px] text-slate-500 font-bold block truncate">Citizens Benefited</span>
+                  <span className="text-[10px] text-slate-500 font-bold block truncate">Est. Benefited Citizens</span>
                   <span className="text-lg sm:text-xl font-black text-amber-600 font-mono">
                     {(popBenefited / 1000).toFixed(1)}k
                   </span>
                 </div>
               </div>
+              <span className="text-[10px] text-emerald-800/80 block text-center pt-0.5 font-medium">
+                Model projection based on empirical microclimate urban canopy & surface albedo heuristics.
+              </span>
             </div>
 
           </div>

@@ -45,6 +45,7 @@ export default function DashboardPage() {
     citySummary,
     locationSource,
     userArea,
+    userLocation,
     openAreaSelector,
     resetToMyLocation,
     setAreaById,
@@ -148,9 +149,23 @@ export default function DashboardPage() {
               )}
             </div>
 
-            <p className="text-xs text-slate-500">
-              Live microclimate observations & neighborhood heat advisories.
-            </p>
+            {locationSource === 'detected' && userLocation ? (
+              <p className="text-xs text-slate-600 flex items-center gap-1.5 flex-wrap">
+                <span className="font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded text-[11px] font-mono">
+                  Your GPS: {userLocation.latitude.toFixed(4)}°N, {userLocation.longitude.toFixed(4)}°E
+                </span>
+                <span className="text-slate-400">•</span>
+                <span>Nearest Monitored Pilot Ward: <strong className="text-slate-900">{areaName}</strong></span>
+              </p>
+            ) : locationSource === 'manual' ? (
+              <p className="text-xs text-slate-500">
+                Manually Selected Pilot Ward: <strong className="text-slate-800">{areaName}</strong> (Kanpur Urban Heat Island Monitoring)
+              </p>
+            ) : (
+              <p className="text-xs text-slate-500">
+                Default Demonstration Ward: <strong className="text-slate-800">Kidwai Nagar (Barra)</strong> • Click "Detect Location" to map to your nearest ward.
+              </p>
+            )}
           </div>
 
           {/* Quick Actions */}
