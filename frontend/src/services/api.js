@@ -22,6 +22,8 @@ export async function fetchHeatmapGeoJSON() {
   }
 }
 
+import { calculateCoolRouteLocal } from './routeService';
+
 export async function fetchLocations() {
   try {
     const res = await fetch(`${BASE_URL}/locations`);
@@ -30,6 +32,26 @@ export async function fetchLocations() {
   } catch (err) {
     console.warn("API offline, returning fallback Kanpur locations:", err.message);
     return { success: true, data: fallbackKanpurLocations };
+  }
+}
+
+export async function fetchRoutes(origin = 'loc_central', destination = 'loc_allen_zoo') {
+  try {
+    const res = await fetch(`${BASE_URL}/routes?origin=${origin}&destination=${destination}`);
+    if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+    const data = await res.json();
+    if (data && data.route && data.route.coolRoute) {
+      return data;
+    }
+    throw new Error("Invalid route response structure");
+  } catch (err) {
+    console.warn("API routes endpoint offline, calculating deterministic Kanpur routes:", err.message);
+    const localRoute = calculateCoolRouteLocal(origin, destination);
+    return {
+      success: true,
+      datasetLabel: "Thermal-Weighted Pedestrian Routing Prototype",
+      route: localRoute
+    };
   }
 }
 
@@ -374,38 +396,6 @@ export async function runSimulation(locationId, params) {
           lstReduction,
           riskScoreDelta: Math.round(lstReduction * 4.2),
           populationBenefitedEstimate: 14500
-        }
-      }
-    };
-  }
-}
-
-export async function fetchRoutes(origin = "loc_central", destination = "loc_allen_zoo") {
-  try {
-    const res = await fetch(`${BASE_URL}/routes?origin=${origin}&destination=${destination}`);
-    if (!res.ok) throw new Error(`HTTP error ${res.status}`);
-    return await res.json();
-  } catch (err) {
-    return {
-      success: true,
-      datasetLabel: "Thermal-Weighted Pedestrian Routing Prototype",
-      route: {
-        origin: { id: "loc_central", name: "Kanpur Central & Ghanta Ghar" },
-        destination: { id: "loc_allen_zoo", name: "Allen Forest Zoo & Nawabganj Greens" },
-        shortestRoute: {
-          distanceKm: 7.2,
-          estimatedWalkTimeMins: 90,
-          avgThermalRisk: 86,
-          thermalExposureIndex: 740,
-          description: "Direct road network along crowded arterial highway corridor"
-        },
-        coolRoute: {
-          distanceKm: 8.1,
-          estimatedWalkTimeMins: 102,
-          avgThermalRisk: 48,
-          thermalExposureIndex: 460,
-          description: "Heat-aware pathway prioritizing Civil Lines tree-lined boulevards and Phool Bagh canopy",
-          thermalStressReductionPct: 38
         }
       }
     };

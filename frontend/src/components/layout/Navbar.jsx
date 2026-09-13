@@ -53,10 +53,11 @@ export default function Navbar() {
     return () => clearInterval(interval);
   }, []);
 
-  // Primary citizen-facing navigation (Prioritized 5 items)
+  // Primary citizen-facing navigation (Prioritized core items)
   const primaryNavItems = [
     { name: 'Dashboard', path: '/dashboard', icon: BarChart3 },
     { name: 'Heat Map', path: '/map', icon: Map },
+    { name: 'Route Planner', path: '/cool-routes', icon: Navigation },
     { name: 'Forecast', path: '/forecast', icon: Activity },
     { name: 'Digital Twin', path: '/digital-twin', icon: Cpu },
     { name: 'Heat Equity', path: '/heat-equity', icon: Scale }
@@ -64,8 +65,11 @@ export default function Navbar() {
 
   // Secondary citizen community items accessible via More menu
   const secondaryNavItems = [
-    { name: 'Cool Routes', path: '/cool-routes', icon: Navigation, desc: 'Thermal navigation' },
-    { name: 'Citizen Action', path: '/citizen-action', icon: Users, desc: 'Earn climate badges' }
+    { name: 'Mitigation Advisor', path: '/mitigation', icon: Lightbulb, desc: 'AI Cooling Actions' },
+    { name: 'Citizen Action', path: '/citizen-action', icon: Users, desc: 'Earn climate badges' },
+    { name: 'Analytics & Trends', path: '/analytics', icon: Activity, desc: 'Ward microclimate stats' },
+    { name: 'TEE Security', path: '/security', icon: ShieldCheck, desc: 'Confidential enclave' },
+    { name: 'About Mission', path: '/about', icon: Info, desc: 'Kanpur methodology' }
   ];
 
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
@@ -253,7 +257,7 @@ export default function Navbar() {
             )}
 
             {/* Mobile Drawer Trigger */}
-            <div className="flex xl:hidden">
+            <div className="flex lg:hidden">
               <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="text-slate-700 hover:text-slate-900 p-2 rounded-xl bg-slate-100 border border-slate-200 focus:outline-none cursor-pointer"
@@ -269,7 +273,7 @@ export default function Navbar() {
 
       {/* Mobile Navigation Drawer */}
       {isOpen && (
-        <div className="xl:hidden bg-white/95 border-b border-slate-200 px-4 pt-2 pb-6 space-y-2 shadow-2xl backdrop-blur-2xl animate-fadeIn">
+        <div className="lg:hidden bg-white/95 border-b border-slate-200 px-4 pt-2 pb-6 space-y-2 shadow-2xl backdrop-blur-2xl animate-fadeIn">
           {/* Mobile Active Area Banner */}
           <div className="p-3 bg-slate-50 rounded-xl border border-orange-500/30 flex items-center justify-between">
             <div className="flex items-center gap-2.5">

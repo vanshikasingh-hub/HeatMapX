@@ -95,12 +95,14 @@
 .heat-text-gradient {
   background: linear-gradient(135deg, #FF4500 0%, #FF7A18 50%, #FFA726 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .cyan-text-gradient {
   background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 50%, #06b6d4 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 

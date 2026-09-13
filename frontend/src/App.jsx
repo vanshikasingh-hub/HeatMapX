@@ -88,8 +88,8 @@ export default function App() {
                 <Route path="/cool-routes" element={<CoolRoutesPage />} />
                 <Route path="/heat-equity" element={<HeatEquityPage />} />
                 
-                {/* Analytics redirected cleanly to Dashboard */}
-                <Route path="/analytics" element={<Navigate to="/dashboard" replace />} />
+                {/* Analytics & Statistical Regression */}
+                <Route path="/analytics" element={<AnalyticsPage />} />
                 <Route path="/citizen-action" element={<CitizenActionPage />} />
 
                 {/* Security & Mission */}

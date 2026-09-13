@@ -291,70 +291,191 @@ function calculateCoolRoute(originId, destinationId) {
     [endLat, endLng]
   ];
 
-  // Turn-by-turn guidance with thermal warnings
-  const steps = [
+  // Calculate Route Score: w1 * Thermal Exposure + w2 * Sun Exposure + w3 * (100 - Shade) + w4 * Walking Cost
+  function calcScore(thermalExp, sunExp, shadePct, distKm) {
+    const wThermal = 0.35;
+    const wSun = 0.25;
+    const wShade = 0.25;
+    const wWalk = 0.15;
+    const normWalk = Math.min(100, Math.max(10, (distKm / 4.0) * 100));
+    return Math.round(wThermal * thermalExp + wSun * sunExp + wShade * Math.max(0, 100 - shadePct) + wWalk * normWalk);
+  }
+
+  const coolRouteScore = calcScore(coolThermalExposureIndex, 20, 80, coolRouteDistanceKm);
+  const balancedRouteScore = calcScore(balancedThermalExposureIndex, 48, 55, balancedDistanceKm);
+  const shortestRouteScore = calcScore(shortestThermalExposureIndex, 84, 20, shortestDistanceKm);
+
+  // Per-route Turn-by-Turn Guidance
+  const coolSteps = [
     {
-      instruction: `Depart from ${origin.name}`,
-      distanceMeters: 400,
-      shadeLevel: "Low",
-      temperature: `${(origin.metrics.lst * 0.95).toFixed(1)}°C`,
-      thermalWarning: "Direct solar glare on asphalt — recommend UV umbrella or cap."
+      step: 1,
+      instruction: `Depart from ${origin.name} via pedestrian sidewalk`,
+      maneuver: "start",
+      distanceMeters: Math.round(coolRouteDistanceKm * 120),
+      shadeLevel: "Moderate (45%)",
+      temperature: `${(origin.metrics.airTemperature).toFixed(1)}°C`,
+      thermalWarning: "Morning ground heat rising; shaded tree corridor starts in 150 m."
     },
     {
-      instruction: "Turn right onto tree-lined avenue toward Green Belt",
-      distanceMeters: 850,
-      shadeLevel: "High (Canopy Cover)",
-      temperature: "32.4°C",
-      thermalWarning: "Favorable microclimate under neem canopy (-4.2°C ambient reduction)."
+      step: 2,
+      instruction: "Turn right into shaded Green Belt Avenue / Tree-Lined Promenade",
+      maneuver: "turn-right",
+      distanceMeters: Math.round(coolRouteDistanceKm * 240),
+      shadeLevel: "High Canopy (85%)",
+      temperature: `${(origin.metrics.airTemperature - 2.8).toFixed(1)}°C`,
+      thermalWarning: "🌳 Shaded segment active — ambient temperature reduced by ~3.2°C."
     },
     {
-      instruction: "Pass Municipal Hydration Point / Public Water ATM",
-      distanceMeters: 550,
-      shadeLevel: "Moderate",
-      temperature: "34.1°C",
-      thermalWarning: "Refill drinking water here; free chilled municipal kiosk available."
+      step: 3,
+      instruction: "Pass Nana Rao Park / Municipal Hydration & Misting Pavilion",
+      maneuver: "straight",
+      distanceMeters: Math.round(coolRouteDistanceKm * 280),
+      shadeLevel: "Very High (92%)",
+      temperature: `${(origin.metrics.airTemperature - 3.4).toFixed(1)}°C`,
+      thermalWarning: "💧 Free municipal chilled drinking water kiosk and misting canopy available."
     },
     {
-      instruction: "Traverse shaded park promenade walkway",
-      distanceMeters: 900,
-      shadeLevel: "Very High",
-      temperature: "31.0°C",
-      thermalWarning: "Optimal thermal comfort segment — cool misting active 11am-4pm."
+      step: 4,
+      instruction: "Turn left along covered sidewalk portico toward destination precinct",
+      maneuver: "turn-left",
+      distanceMeters: Math.round(coolRouteDistanceKm * 220),
+      shadeLevel: "High (78%)",
+      temperature: `${(destination.metrics.airTemperature - 2.1).toFixed(1)}°C`,
+      thermalWarning: null
     },
     {
-      instruction: `Arrive at destination: ${destination.name}`,
-      distanceMeters: 300,
-      shadeLevel: "Moderate",
-      temperature: `${(destination.metrics.lst * 0.92).toFixed(1)}°C`,
-      thermalWarning: "Destination reached. Cool shelter and rest benches available."
+      step: 5,
+      instruction: `Arrive safely at ${destination.name}`,
+      maneuver: "arrival",
+      distanceMeters: Math.max(120, Math.round(coolRouteDistanceKm * 140)),
+      shadeLevel: "Moderate (65%)",
+      temperature: `${(destination.metrics.airTemperature).toFixed(1)}°C`,
+      thermalWarning: "🏁 Destination reached with minimal cumulative solar radiation."
     }
   ];
 
-  // Heat & elevation profile along route
-  const profile = [
-    { distanceKm: 0.0, elevation: 126, heatScore: 84, shadePct: 15 },
-    { distanceKm: 0.8, elevation: 127, heatScore: 68, shadePct: 45 },
-    { distanceKm: 1.6, elevation: 128, heatScore: 42, shadePct: 82 },
-    { distanceKm: 2.4, elevation: 129, heatScore: 35, shadePct: 90 },
-    { distanceKm: 3.2, elevation: 128, heatScore: 48, shadePct: 70 },
-    { distanceKm: 4.0, elevation: 127, heatScore: 55, shadePct: 50 },
-    { distanceKm: 4.8, elevation: 126, heatScore: 50, shadePct: 60 }
+  const balancedSteps = [
+    {
+      step: 1,
+      instruction: `Start from ${origin.name} heading toward collector road`,
+      maneuver: "start",
+      distanceMeters: Math.round(balancedDistanceKm * 180),
+      shadeLevel: "Moderate (50%)",
+      temperature: `${(origin.metrics.airTemperature + 0.8).toFixed(1)}°C`,
+      thermalWarning: null
+    },
+    {
+      step: 2,
+      instruction: "Turn slightly right onto semi-canopied secondary corridor",
+      maneuver: "turn-right",
+      distanceMeters: Math.round(balancedDistanceKm * 320),
+      shadeLevel: "Moderate (60%)",
+      temperature: `${(origin.metrics.airTemperature - 1.2).toFixed(1)}°C`,
+      thermalWarning: "Balanced shade protection along street tree line."
+    },
+    {
+      step: 3,
+      instruction: "Cross signalized junction and continue straight under building awnings",
+      maneuver: "straight",
+      distanceMeters: Math.round(balancedDistanceKm * 300),
+      shadeLevel: "Moderate (52%)",
+      temperature: `${(destination.metrics.airTemperature).toFixed(1)}°C`,
+      thermalWarning: "⚠ Open intersection crossing ahead (~80 m with direct solar exposure)."
+    },
+    {
+      step: 4,
+      instruction: `Enter ${destination.name} precinct`,
+      maneuver: "arrival",
+      distanceMeters: Math.max(140, Math.round(balancedDistanceKm * 200)),
+      shadeLevel: "Moderate (55%)",
+      temperature: `${destination.metrics.airTemperature.toFixed(1)}°C`,
+      thermalWarning: "🏁 Destination reached. Balanced trade-off between walk time and shade."
+    }
   ];
 
-  // Municipal hydration points
+  const shortestSteps = [
+    {
+      step: 1,
+      instruction: `Exit ${origin.name} onto direct arterial highway / main road`,
+      maneuver: "start",
+      distanceMeters: Math.round(shortestDistanceKm * 250),
+      shadeLevel: "Low (20%)",
+      temperature: `${(origin.metrics.airTemperature + 2.6).toFixed(1)}°C`,
+      thermalWarning: "⚠ High heat exposure ahead — direct sunlight on asphalt corridor."
+    },
+    {
+      step: 2,
+      instruction: "Walk straight along unshaded asphalt thoroughfare with heavy traffic",
+      maneuver: "straight",
+      distanceMeters: Math.round(shortestDistanceKm * 450),
+      shadeLevel: "Very Low (15%)",
+      temperature: `${(origin.metrics.airTemperature + 3.8).toFixed(1)}°C`,
+      thermalWarning: "⚠ Intense thermal stress peak (>42°C radiant heat) — stay hydrated!"
+    },
+    {
+      step: 3,
+      instruction: `Turn into destination access gates at ${destination.name}`,
+      maneuver: "arrival",
+      distanceMeters: Math.max(150, Math.round(shortestDistanceKm * 300)),
+      shadeLevel: "Low (25%)",
+      temperature: `${(destination.metrics.airTemperature + 1.5).toFixed(1)}°C`,
+      thermalWarning: "🏁 Arrived via fastest route. Total heat dosage was significantly higher."
+    }
+  ];
+
+  // Per-route microclimate heat profiles
+  function makeProfile(distKm, rType, baseT) {
+    const pts = 9;
+    const step = distKm / (pts - 1);
+    const arr = [];
+    for (let i = 0; i < pts; i++) {
+      const d = Number((i * step).toFixed(2));
+      const pos = i / (pts - 1);
+      let score, temp, shade, cond;
+      if (rType === 'cool') {
+        if (pos < 0.2) { score = 46; temp = Number((baseT - 0.5).toFixed(1)); shade = 52; cond = 'Moderate Entryway'; }
+        else if (pos <= 0.75) { score = Math.round(26 + Math.sin(pos * Math.PI) * 9); temp = Number((baseT - 3.2).toFixed(1)); shade = 82; cond = 'Cooler Canopy Corridor'; }
+        else { score = 38; temp = Number((baseT - 1.8).toFixed(1)); shade = 68; cond = 'Shaded Approach'; }
+      } else if (rType === 'balanced') {
+        score = Math.round(52 + Math.sin(pos * Math.PI * 2) * 8);
+        temp = Number((baseT + Math.sin(pos * 4) * 0.8).toFixed(1));
+        shade = 55;
+        cond = score > 58 ? 'Moderate Sun Corridor' : 'Partially Shaded Connector';
+      } else {
+        score = Math.round(76 + Math.sin(pos * Math.PI) * 16);
+        temp = Number((baseT + 2.5 + Math.sin(pos * Math.PI) * 1.8).toFixed(1));
+        shade = 20;
+        cond = score >= 80 ? 'High Heat Stress Peak' : 'Unshaded Roadway';
+      }
+      arr.push({ distanceKm: d, heatScore: score, temperature: temp, shadePct: shade, segmentCondition: cond });
+    }
+    return arr;
+  }
+
+  const baseTemp = Number(((origin.metrics.airTemperature + destination.metrics.airTemperature) / 2).toFixed(1));
+  const coolProfile = makeProfile(coolRouteDistanceKm, 'cool', baseTemp);
+  const balancedProfile = makeProfile(balancedDistanceKm, 'balanced', baseTemp);
+  const shortestProfile = makeProfile(shortestDistanceKm, 'shortest', baseTemp);
+
   const waterStops = [
     {
       id: "ws_1",
-      name: "Civil Lines Municipal Water ATM",
-      coords: [startLat + (endLat - startLat) * 0.35 + 0.002, startLng + (endLng - startLng) * 0.30],
-      type: "Cold RO Drinking Water Kiosk (Free)",
+      name: "Kanpur Nagar Nigam Hydration Kiosk",
+      coords: [
+        Number((startLat + (endLat - startLat) * 0.35 + 0.0015).toFixed(4)),
+        Number((startLng + (endLng - startLng) * 0.35 - 0.001).toFixed(4))
+      ],
+      type: "Free Chilled RO Drinking Water (Active)",
       active: true
     },
     {
       id: "ws_2",
-      name: "Nana Rao Park Shade Pavilion",
-      coords: [startLat + (endLat - startLat) * 0.65 + 0.004, startLng + (endLng - startLng) * 0.60 - 0.003],
-      type: "Tree Canopy & Evaporative Misting Rest Stop",
+      name: "Green Belt Misting & Shade Gazebo",
+      coords: [
+        Number((startLat + (endLat - startLat) * 0.68 + 0.002).toFixed(4)),
+        Number((startLng + (endLng - startLng) * 0.68 - 0.0015).toFixed(4))
+      ],
+      type: "Evaporative Micro-Misting Shelter (-4°C)",
       active: true
     }
   ];
@@ -364,47 +485,59 @@ function calculateCoolRoute(originId, destinationId) {
     destination: { id: destination.id, name: destination.name, coords: [destination.latitude, destination.longitude] },
     shortestRoute: {
       id: "route_fastest",
-      name: "Fastest Direct Route",
+      type: "shortest",
+      name: "⚡ Fastest Direct Route",
       distanceKm: shortestDistanceKm,
       estimatedWalkTimeMins: Math.round(shortestDistanceKm * 13),
       avgThermalRisk: avgPathRiskDirect,
       thermalExposureIndex: shortestThermalExposureIndex,
-      shadePercentage: 22,
-      waterStopsCount: 1,
+      shadePercentage: 20,
+      routeScore: shortestRouteScore,
+      waterStopsCount: 0,
       color: "#ef4444",
       description: "Direct road network via high-traffic urban corridors. High solar exposure.",
-      waypoints: shortestWaypoints
+      waypoints: shortestWaypoints,
+      steps: shortestSteps,
+      profile: shortestProfile
     },
     coolRoute: {
       id: "route_coolest",
-      name: "Heat-Aware Cool Route",
+      type: "cool",
+      name: "🌿 Heat-Aware Cool Route",
       distanceKm: coolRouteDistanceKm,
-      estimatedWalkTimeMins: Math.round(coolRouteDistanceKm * 15),
+      estimatedWalkTimeMins: Math.round(coolRouteDistanceKm * 14),
       avgThermalRisk: avgPathRiskCool,
       thermalExposureIndex: coolThermalExposureIndex,
-      shadePercentage: 78,
+      shadePercentage: 80,
+      routeScore: coolRouteScore,
       waterStopsCount: 2,
       color: "#10b981",
       description: "Prioritizes tree canopy avenues, park pathways, and covered walkways.",
       thermalStressReductionPct: Math.round(((shortestThermalExposureIndex - coolThermalExposureIndex) / shortestThermalExposureIndex) * 100),
-      waypoints: coolWaypoints
+      waypoints: coolWaypoints,
+      steps: coolSteps,
+      profile: coolProfile
     },
     balancedRoute: {
       id: "route_balanced",
-      name: "Balanced Route",
+      type: "balanced",
+      name: "⚖️ Balanced Route",
       distanceKm: balancedDistanceKm,
-      estimatedWalkTimeMins: Math.round(balancedDistanceKm * 14),
+      estimatedWalkTimeMins: Math.round(balancedDistanceKm * 13.5),
       avgThermalRisk: balancedRisk,
       thermalExposureIndex: balancedThermalExposureIndex,
-      shadePercentage: 54,
-      waterStopsCount: 2,
-      color: "#28B8F2",
+      shadePercentage: 55,
+      routeScore: balancedRouteScore,
+      waterStopsCount: 1,
+      color: "#0284c7",
       description: "Equitable tradeoff between walking detour and shade protection.",
       thermalStressReductionPct: Math.round(((shortestThermalExposureIndex - balancedThermalExposureIndex) / shortestThermalExposureIndex) * 100),
-      waypoints: balancedWaypoints
+      waypoints: balancedWaypoints,
+      steps: balancedSteps,
+      profile: balancedProfile
     },
-    steps,
-    profile,
+    steps: coolSteps,
+    profile: coolProfile,
     waterStops
   };
 }
